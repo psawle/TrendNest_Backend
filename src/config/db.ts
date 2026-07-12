@@ -1,6 +1,16 @@
 import mongoose from "mongoose";
 import { env } from "./env.js";
 
+mongoose.set("toJSON", {
+  virtuals: true,
+  versionKey: false,
+  transform: (_doc, ret: Record<string, unknown>) => {
+    ret.id = ret._id;
+    delete ret._id;
+    delete ret.password;
+  },
+});
+
 export async function connectDB(): Promise<void> {
   try {
     await mongoose.connect(env.MONGODB_URI);
