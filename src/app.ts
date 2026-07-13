@@ -5,6 +5,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 
 import authRoutes from "./modules/auth/auth.routes.js";
+import usersRoutes from "./modules/users/users.routes.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 const app = express();
 
@@ -17,7 +18,7 @@ app.use("/api/v1/auth", authRoutes);
 app.get("/api/v1/health", (_req, res) => {
   res.json({ status: "ok", uptime: process.uptime() });
 });
-
+app.use("/api/v1/users", usersRoutes);
 app.use(errorHandler)
 
 export default app;

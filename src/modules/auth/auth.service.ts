@@ -1,5 +1,5 @@
 import bcrypt from "bcryptjs";
-import { User } from "../user/user.model.js";
+import { User } from "../users/user.model.js";
 import { AppError } from "../../utils/AppError.js";
 import { signAccessToken, signRefreshToken } from "../../utils/jwt.js";
 import type { RegisterInput, LoginInput } from "./auth.schema.js";
