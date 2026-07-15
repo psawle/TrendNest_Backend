@@ -20,14 +20,16 @@ export async function checkout(userId: string) {
 
       const items = cartItems.map((cartItem) => {
         const product = productsById.get(cartItem.productId.toString());
-        if (!product) throw new AppError(400, "PRODUCT_UNAVAILABLE", "A cart product no longer exists");
+        if (!product || !product.isActive) {
+          throw new AppError(400, "PRODUCT_UNAVAILABLE", "A cart product is no longer available");
+        }
         if (product.stock < cartItem.quantity) {
           throw new AppError(400, "INSUFFICIENT_STOCK", `${product.title} no longer has enough stock`);
         }
         return {
           productId: product._id,
           title: product.title,
-          price: product.price,
+          pricePaise: product.pricePaise,
           quantity: cartItem.quantity,
         };
       });
@@ -35,15 +37,15 @@ export async function checkout(userId: string) {
       // Conditional updates make the final stock deduction safe even if another checkout runs concurrently.
       for (const item of items) {
         const updated = await Product.findOneAndUpdate(
-          { _id: item.productId, stock: { $gte: item.quantity } },
+          { _id: item.productId, isActive: true, stock: { $gte: item.quantity } },
           { $inc: { stock: -item.quantity } },
           { new: true, session },
         );
         if (!updated) throw new AppError(400, "INSUFFICIENT_STOCK", "A product just went out of stock");
       }
 
-      const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-      [order] = await Order.create([{ userId, items, subtotal }], { session });
+      const subtotalPaise = items.reduce((sum, item) => sum + item.pricePaise * item.quantity, 0);
+      [order] = await Order.create([{ userId, items, subtotalPaise }], { session });
       await CartItem.deleteMany({ userId }).session(session);
     });
   } finally {

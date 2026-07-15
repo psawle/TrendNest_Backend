@@ -5,6 +5,7 @@ export interface IUser {
   email: string;
   password: string;
   role: "customer" | "admin";
+  isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -15,6 +16,7 @@ const userSchema = new Schema<IUser>(
     email: { type: String, required: true, unique: true, lowercase: true, trim: true },
     password: { type: String, required: true, select: false },
     role: { type: String, enum: ["customer", "admin"], default: "customer" },
+    isActive: { type: Boolean, default: true },
   },
   { timestamps: true }
 );

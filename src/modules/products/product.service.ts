@@ -1,15 +1,17 @@
 import { Product } from "./product.model.js";
+import mongoose from "mongoose";
+import { CartItem } from "../cart/cartItem.model.js";
 import { AppError } from "../../utils/AppError.js";
 import type { CreateProductInput, UpdateProductInput, ListProductsQuery } from "./product.schema.js";
 
 export async function listProducts(query: ListProductsQuery) {
-  const filter: Record<string, unknown> = {};
+  const filter: Record<string, unknown> = { isActive: true };
   if (query.category) filter.category = query.category.toLowerCase();
   if (query.search) filter.$text = { $search: query.search };
 
   const sortMap = {
-    price_asc: { price: 1 as const },
-    price_desc: { price: -1 as const },
+    price_asc: { pricePaise: 1 as const },
+    price_desc: { pricePaise: -1 as const },
     newest: { createdAt: -1 as const },
   };
 
@@ -27,7 +29,7 @@ export async function listProducts(query: ListProductsQuery) {
 }
 
 export async function getProductById(id: string) {
-  const product = await Product.findById(id);
+  const product = await Product.findOne({ _id: id, isActive: true });
   if (!product) throw new AppError(404, "PRODUCT_NOT_FOUND", "Product not found");
   return product;
 }
@@ -43,6 +45,20 @@ export async function updateProduct(id: string, input: UpdateProductInput) {
 }
 
 export async function deleteProduct(id: string) {
-  const product = await Product.findByIdAndDelete(id);
-  if (!product) throw new AppError(404, "PRODUCT_NOT_FOUND", "Product not found");
+  const session = await mongoose.startSession();
+  try {
+    await session.withTransaction(async () => {
+      // Preserve the product for order history and cancellation/restocking, while
+      // removing it from sale and from carts before it can block checkout.
+      const product = await Product.findOneAndUpdate(
+        { _id: id, isActive: true },
+        { $set: { isActive: false } },
+        { new: true, session },
+      );
+      if (!product) throw new AppError(404, "PRODUCT_NOT_FOUND", "Product not found");
+      await CartItem.deleteMany({ productId: id }).session(session);
+    });
+  } finally {
+    await session.endSession();
+  }
 }
