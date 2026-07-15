@@ -3,6 +3,7 @@ import express from "express";
 import helmet from "helmet";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import productsRoutes from "./modules/products/products.routes.js";
 
 import authRoutes from "./modules/auth/auth.routes.js";
 import usersRoutes from "./modules/users/users.routes.js";
@@ -20,5 +21,6 @@ app.get("/api/v1/health", (_req, res) => {
 });
 app.use("/api/v1/users", usersRoutes);
 app.use(errorHandler)
+app.use("/api/v1/products", productsRoutes);
 
 export default app;
