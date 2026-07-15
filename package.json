@@ -7,7 +7,9 @@
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "build": "tsc",
-    "start": "node dist/server.js"
+    "start": "node dist/server.js",
+    "migrate:money": "tsx src/scripts/migrate-money-to-paise.ts",
+    "test": "node --import tsx --test src/tests/**/*.integration.test.ts"
   },
   "keywords": [],
   "author": "",
