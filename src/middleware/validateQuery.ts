@@ -4,6 +4,7 @@ import type { ZodType } from "zod";
 
 export const validateQuery =
   (schema: ZodType) => (req: Request, _res: Response, next: NextFunction) => {
-    req.query = schema.parse(req.query) as any;
+    const parsed = schema.parse(req.query); // throws ZodError → errorHandler catches it
+    Object.assign(req.query, parsed); // mutates in place; req.query is a getter in Express 5
     next();
   };

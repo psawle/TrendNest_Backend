@@ -3,10 +3,10 @@ import { z } from "zod";
 export const createProductSchema = z.object({
   title: z.string().min(2).trim(),
   description: z.string().min(10),
-  pricePaise: z.coerce.number().int().positive().max(Number.MAX_SAFE_INTEGER),
+  price: z.coerce.number().positive(),
   category: z.string().min(2).trim().toLowerCase(),
   image: z.string().url(),
-  stock: z.coerce.number().int().nonnegative().default(0),
+  stock: z.coerce.number().int().nonnegative(),
   isActive: z.boolean().default(true),
 });
 

@@ -35,11 +35,16 @@ export async function getProductById(id: string) {
 }
 
 export async function createProduct(input: CreateProductInput) {
-  return Product.create(input);
+  const { price, ...rest } = input;
+  return Product.create({ ...rest, pricePaise: Math.round(price * 100) });
 }
 
 export async function updateProduct(id: string, input: UpdateProductInput) {
-  const product = await Product.findByIdAndUpdate(id, input, { new: true, runValidators: true });
+  const { price, ...rest } = input;
+  const update: Record<string, unknown> = { ...rest };
+  if (price !== undefined) update.pricePaise = Math.round(price * 100);
+
+  const product = await Product.findByIdAndUpdate(id, update, { new: true, runValidators: true });
   if (!product) throw new AppError(404, "PRODUCT_NOT_FOUND", "Product not found");
   return product;
 }

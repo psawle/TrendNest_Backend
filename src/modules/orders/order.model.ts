@@ -28,8 +28,21 @@ const orderItemSchema = new Schema<IOrderItem>(
     },
     quantity: { type: Number, required: true, min: 1 },
   },
-  { _id: false }
+  {
+    _id: false,
+    // Mirrors the product API's rupee/paise boundary: pricePaise is internal storage only.
+    toJSON: {
+      virtuals: true,
+      transform: (_doc, ret: Record<string, unknown>) => {
+        delete ret.pricePaise;
+      },
+    },
+  }
 );
+
+orderItemSchema.virtual("price").get(function (this: IOrderItem) {
+  return this.pricePaise / 100;
+});
 
 const orderSchema = new Schema<IOrder>(
   {
@@ -47,7 +60,22 @@ const orderSchema = new Schema<IOrder>(
       default: "pending",
     },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+    toJSON: {
+      virtuals: true,
+      versionKey: false,
+      transform: (_doc, ret: Record<string, unknown>) => {
+        ret.id = ret._id;
+        delete ret._id;
+        delete ret.subtotalPaise;
+      },
+    },
+  }
 );
+
+orderSchema.virtual("subtotal").get(function (this: IOrder) {
+  return this.subtotalPaise / 100;
+});
 
 export const Order = model<IOrder>("Order", orderSchema);

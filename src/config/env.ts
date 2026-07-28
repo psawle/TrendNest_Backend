@@ -9,6 +9,7 @@ const envSchema = z.object({
   JWT_REFRESH_SECRET: z.string().min(32),
   JWT_ACCESS_EXPIRY: z.string().default("15m"),
   JWT_REFRESH_EXPIRY: z.string().default("7d"),
+  CLIENT_ORIGIN: z.string().default("http://localhost:5173"),
 });
 
 export const env = envSchema.parse(process.env);

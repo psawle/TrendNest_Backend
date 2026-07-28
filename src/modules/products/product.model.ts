@@ -27,9 +27,26 @@ const productSchema = new Schema<IProduct>(
     stock: { type: Number, default: 0, min: 0 },
     isActive: { type: Boolean, default: true, index: true },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+    // The API contract is decimal rupees; pricePaise is an internal storage detail
+    // that stays out of every response so the frontend never has to convert it.
+    toJSON: {
+      virtuals: true,
+      versionKey: false,
+      transform: (_doc, ret: Record<string, unknown>) => {
+        ret.id = ret._id;
+        delete ret._id;
+        delete ret.pricePaise;
+      },
+    },
+  }
 );
 
 productSchema.index({ title: "text", description: "text" });
+
+productSchema.virtual("price").get(function (this: IProduct) {
+  return this.pricePaise / 100;
+});
 
 export const Product = model<IProduct>("Product", productSchema);
