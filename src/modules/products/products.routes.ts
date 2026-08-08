@@ -3,6 +3,7 @@ import * as ctrl from "./product.controller.js";
 import { validate } from "../../middleware/validate.js";
 import { validateQuery } from "../../middleware/validateQuery.js";
 import { requireAuth, requireAdmin } from "../../middleware/auth.js";
+import { uploadImage } from "../../middleware/upload.js";
 import { objectIdSchema } from "../../utils/objectId.schema.js";
 import reviewRoutes from "../reviews/review.routes.js";
 import {
@@ -15,6 +16,13 @@ const router = Router();
 
 router.get("/", validateQuery(listProductsQuerySchema), ctrl.list);
 router.get("/:id", ctrl.getById);
+router.post(
+  "/upload-image",
+  requireAuth,
+  requireAdmin,
+  uploadImage.single("image"),
+  ctrl.uploadImage,
+);
 router.post("/", requireAuth, requireAdmin, validate(createProductSchema), ctrl.create);
 router.put("/:id", requireAuth, requireAdmin, validate(updateProductSchema), ctrl.update);
 router.delete("/:id", requireAuth, requireAdmin, ctrl.remove);
