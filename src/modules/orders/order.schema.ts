@@ -1,6 +1,7 @@
 import { z } from "zod";
+import { objectIdSchema } from "../../utils/objectId.schema.js";
 
-export const orderIdSchema = z.string().regex(/^[a-f\d]{24}$/i, "Invalid order id");
+export const orderIdSchema = objectIdSchema;
 
 export const updateOrderStatusSchema = z.object({
   status: z.enum(["paid", "shipped", "delivered"]),

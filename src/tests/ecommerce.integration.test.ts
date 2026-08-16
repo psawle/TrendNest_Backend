@@ -83,7 +83,7 @@ async function createProduct(adminToken: string, stock = 10) {
     body: JSON.stringify({
       title: "Test jacket",
       description: "A product used by the integration test suite.",
-      pricePaise: 19999,
+      price: 199.99,
       category: "clothing",
       image: "https://example.test/jacket.jpg",
       stock,
@@ -122,7 +122,7 @@ test("product administration requires an authenticated admin", async () => {
   const payload = JSON.stringify({
     title: "Blocked product",
     description: "This product must be created by an administrator.",
-    pricePaise: 100,
+    price: 1,
     category: "clothing",
     image: "https://example.test/product.jpg",
   });

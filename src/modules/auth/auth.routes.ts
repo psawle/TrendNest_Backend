@@ -2,7 +2,7 @@ import { Router } from "express";
 import rateLimit from "express-rate-limit";
 import * as ctrl from "./auth.controller.js";
 import { validate } from "../../middleware/validate.js";
-import { registerSchema, loginSchema } from "./auth.schema.js";
+import { registerSchema, loginSchema, forgotPasswordSchema, resetPasswordSchema } from "./auth.schema.js";
 import { env } from "../../config/env.js";
 
 const authLimiter = rateLimit({
@@ -16,5 +16,7 @@ router.post("/register", authLimiter, validate(registerSchema), ctrl.register);
 router.post("/login", authLimiter, validate(loginSchema), ctrl.login);
 router.post("/refresh", ctrl.refresh);
 router.post("/logout", ctrl.logout);
+router.post("/forgot-password", authLimiter, validate(forgotPasswordSchema), ctrl.forgotPassword);
+router.post("/reset-password", authLimiter, validate(resetPasswordSchema), ctrl.resetPassword);
 
 export default router;

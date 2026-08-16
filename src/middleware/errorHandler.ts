@@ -2,11 +2,15 @@
 import type { Request, Response, NextFunction } from "express";
 import { ZodError } from "zod";
 import { Error as MongooseError } from "mongoose";
+import { MulterError } from "multer";
 import { AppError } from "../utils/AppError.js";
 
 export function errorHandler(err: unknown, _req: Request, res: Response, _next: NextFunction) {
   if (err instanceof AppError) {
     return res.status(err.statusCode).json({ error: { code: err.code, message: err.message } });
+  }
+  if (err instanceof MulterError) {
+    return res.status(400).json({ error: { code: err.code, message: err.message } });
   }
   if (err instanceof ZodError) {
     return res.status(400).json({
